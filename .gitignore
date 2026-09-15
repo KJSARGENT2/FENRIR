@@ -1,0 +1,46 @@
+# THIS REPOSITORY IS PUBLIC AND HOLDS RELEASES ONLY.
+#
+# Fenrir's source is closed and lives elsewhere. Nothing here should ever be
+# code. The build is attached to a GitHub Release as an asset -- releases are
+# not commits, so the installer never enters git history and the repo stays
+# small forever.
+#
+# These rules are belt and braces: a stray `git add -A` run from the wrong
+# folder should fail to stage anything that matters rather than publish the
+# product. If you find yourself removing a line here to commit something,
+# that is the signal to stop and check which repository you are in.
+
+# --- the application itself -------------------------------------------------
+*.py
+*.pyc
+__pycache__/
+*.spec
+webui/
+fenrir-scripts/
+ue4ss-mod/
+valheim-plugin/
+IW-Scripts/
+compiled/
+
+# --- builds. Releases carry these, commits never do -------------------------
+*.exe
+*.zip
+*.7z
+*.msi
+dist/
+build/
+
+# --- anything that is a credential or a person ------------------------------
+sign_api_key.txt
+*.key
+*.pem
+.env
+.env.*
+points_balances.json
+user_paths.json
+legal_acceptance.json
+ui_settings.json
+
+# --- local noise ------------------------------------------------------------
+.DS_Store
+Thumbs.db
