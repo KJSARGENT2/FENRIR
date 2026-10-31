@@ -1,0 +1,40 @@
+name: installers-only
+# The public repo holds README.md, RELEASE_NOTES.md, .gitignore and this file ONLY.
+# Installers go through GitHub Releases. Fails and opens an issue if anything else
+# lands on any branch. It reports after the push; it cannot prevent it (the client
+# hook, the ruleset against delete/force-push and keeping everyone but the owner off
+# this repo do that). Owner approved, 31 Oct 2026.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Only the allowed files may exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          REF: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          extra=$(git ls-tree -r --name-only HEAD | grep -v -x -F -e '.gitignore' -e 'README.md' -e 'RELEASE_NOTES.md' -e '.github/workflows/installers-only.yml' || true)
+          if [ -z "$extra" ]; then echo "OK: installers-only"; exit 0; fi
+          echo "Not allowed in the public repo:"; echo "$extra"
+          body="@${ACTOR} pushed files that must never be public on \`${REF}\` (${SHA}):
+
+          \`\`\`
+          ${extra}
+          \`\`\`
+
+          Source code never goes to this repo. Installers ship through GitHub Releases. Remove the files and rewrite the branch (owner decision); if any contained a secret, rotate it."
+          gh issue create --repo "$REPO" --title "Non-installer files pushed to the public repo by ${ACTOR}" --body "$body" || true
+          exit 1
